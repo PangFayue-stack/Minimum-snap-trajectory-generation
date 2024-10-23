@@ -1,8 +1,0 @@
-function time_interval = arrangeT(path, T)
-    n = size(path,1);
-    sum = zeros(1,n);
-    for i=2:n
-        sum(i) = Distance(path(i-1,:)',path(i,:)') + sum(i-1);
-    end
-    sum = sum/sum(n)*T;
-end

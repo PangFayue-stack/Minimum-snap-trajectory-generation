@@ -27,13 +27,13 @@ if nargin > 1 % generate a trajectory (given waypoints)
     % TODO: 
     % Assuming the quadrotor flies at unit speed, we calculate
     % each time instance at which the quadrotor passes by each waypoint.
-    num = size(path, 1);  % 航路点的数量
+    num = size(path, 1)-1;  % 航路的段数
+    time_interval = arrangeT(path);
     
     % TODO: Minimum-snap trajectory 
     % Prepare the Q matrix for a 7th-order polynomial
     Q = zeros(8 * num, 8 * num);
-    time_interval
-    for i = 1:(num-1)
+    for i = 1:num
         T = time_interval(i);  % 获取该段航路的时间间隔
         for r = 4:7  % snap 是 7阶多项式的四阶导数
             for c = 4:7
@@ -45,8 +45,8 @@ if nargin > 1 % generate a trajectory (given waypoints)
     % TODO: 
     % Prepare the mapping matrix (polynomial coefficients --> derivatives of states)
     M = zeros(8 * num, 8 * num );
-    for i = 1:(num-1)
-        T = time_interval(i);
+    for i = 1:num
+        T =time_interval(i);
         M((i-1)*8+1:(i-1)*8+4, (i-1)*8+1:(i-1)*8+8) = ...
             [1, T, T^2, T^3, T^4, T^5, T^6, T^7;   % 位置
              0, 1, 2*T, 3*T^2, 4*T^3, 5*T^4, 6*T^5, 7*T^6;  % 速度
@@ -90,11 +90,11 @@ if nargin > 1 % generate a trajectory (given waypoints)
 %     d_z = 
     
     % TODO: mapping back to coefficients of the polynomial (position)
-    p_x = 
-    p_y = 
-    p_z = 
+%     p_x = 
+%     p_y = 
+%     p_z = 
     
-    pos_coeffs = 
+%     pos_coeffs = 
     
     % TODO: work out the coefficients of the velocity polynomial
     v_x = zeros(size(p_x));

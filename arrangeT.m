@@ -1,10 +1,9 @@
-function time_interval = arrangeT(path, T)
+function time_interval = arrangeT(path)
     n = size(path,1);
-    sum = zeros(1,n);
-    for i=2:n
-        sum(i) = distance(path(i-1,:)',path(i,:)') + sum(i-1);
+    time_interval = zeros(1,n-1);
+    for i=1:n-1
+        time_interval(i) = distance(path(i,:)',path(i+1,:)');
     end
-    time_interval = sum/sum(n)*T;
 end
 
 function dist = distance(point1, point2) %column vector
