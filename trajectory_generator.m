@@ -45,14 +45,7 @@ if nargin > 1 % generate a trajectory (given waypoints)
     % TODO: 
     % Prepare the mapping matrix (polynomial coefficients --> derivatives of states)
     M = zeros(8 * num, 8 * num );
-    for i = 1:num
-        T =time_interval(i);
-        M((i-1)*8+1:(i-1)*8+4, (i-1)*8+1:(i-1)*8+8) = ...
-            [1, T, T^2, T^3, T^4, T^5, T^6, T^7;   % 位置
-             0, 1, 2*T, 3*T^2, 4*T^3, 5*T^4, 6*T^5, 7*T^6;  % 速度
-             0, 0, 2, 6*T, 12*T^2, 20*T^3, 30*T^4, 42*T^5;  % 加速度
-             0, 0, 0, 6, 24*T, 60*T^2, 120*T^3, 210*T^4];   % jerk
-    end
+    getM(num,7,time_interval);
      
     % TODO:
 	% Prepare the selection matrix C.
@@ -65,7 +58,7 @@ if nargin > 1 % generate a trajectory (given waypoints)
         Ct(8*i-3, 2*i+3) = 1;
         Ct(8*i+1, 2*i+4) = 1;
     end
-    for i=1:n-1
+    for i=1:num-1
         for j=2:4
             Ct(8*i-4+j, 8+2*(num-1)+3*(i-1)+j-1) = 1;
         end
@@ -75,24 +68,21 @@ if nargin > 1 % generate a trajectory (given waypoints)
     % TODO: prepare the R matrix of the unconstained Quadric Programming
     % (QP) problem.
     R = C*pinv(M)'*Q*pinv(M)*Ct;
-    R_cell = mat2cell(R,[8*2*(num-1), 3*(n-1)],[8*2*(num-1), 3*(n-1)]);
+    R_cell = mat2cell(R,[8+2*(num-1), 3*(n-1)],[8+2*(num-1), 3*(n-1)]);
     R_PP = R_cell{2,2};
     R_FP = R_cell{1,2};
     
     % TODO: Solve the unconstrained QP problem.
     % Prepare for d_F
-    d_Fx = zeros(2 * num + 6,1);
-    d_Fy = zeros(2 * num + 6,1);
-    d_Fz = zeros(2 * num + 6,1);
-    d_Fx = [path(:,1); 0; 0];  % 假设起点和终点的速度、加速度为0
-    d_Fy = [path(:,2); 0; 0];
-    d_Fz = [path(:,3); 0; 0];
-    
+    d_Fx = getdF(path,1,num);
+    d_Fy = getdF(path,2,num);
+    d_Fz = getdF(path,3,num);
+     
     
     % TODO: work out d_P
-    d_Px_opt = -inv(R_PP) * R_FP' * d_Fx;  % 位置
-    d_Py_opt = -inv(R_PP) * R_FP' * d_Fy;
-    d_Pz_opt = -inv(R_PP) * R_FP' * d_Fz;
+    d_Px_opt = -pinv(R_PP) * R_FP' * d_Fx;  
+    d_Py_opt = -pinv(R_PP) * R_FP' * d_Fy;
+    d_Pz_opt = -pinv(R_PP) * R_FP' * d_Fz;
     
     % TODO: stack d_F and d_P into d
 %     d_x = 
