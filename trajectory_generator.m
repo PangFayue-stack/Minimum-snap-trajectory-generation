@@ -22,6 +22,7 @@ persistent waypoints traj_time time_interval pos_coeffs vel_coeffs
 s_des = zeros(13,1);
 s_des(7:10) = [1;0;0;0];
 
+
 % Part I
 if nargin > 1 % generate a trajectory (given waypoints)
     % TODO: 
@@ -29,6 +30,7 @@ if nargin > 1 % generate a trajectory (given waypoints)
     % each time instance at which the quadrotor passes by each waypoint.
     num = size(path, 1)-1;  % 航路的段数
     time_interval = arrangeT(path);
+    traj_time = arrangeT(path);
     
     % TODO: Minimum-snap trajectory 
     % Prepare the Q matrix for a 7th-order polynomial
@@ -68,15 +70,15 @@ if nargin > 1 % generate a trajectory (given waypoints)
     % TODO: prepare the R matrix of the unconstained Quadric Programming
     % (QP) problem.
     R = C*pinv(M)'*Q*pinv(M)*Ct;
-    R_cell = mat2cell(R,[8+2*(num-1), 3*(n-1)],[8+2*(num-1), 3*(n-1)]);
+    R_cell = mat2cell(R,[8+2*(num-1), 3*(num-1)],[8+2*(num-1), 3*(num-1)]);
     R_PP = R_cell{2,2};
     R_FP = R_cell{1,2};
     
     % TODO: Solve the unconstrained QP problem.
     % Prepare for d_F
-    d_Fx = getdF(path,1,num);
-    d_Fy = getdF(path,2,num);
-    d_Fz = getdF(path,3,num);
+    d_Fx = getdF(path,1);
+    d_Fy = getdF(path,2);
+    d_Fz = getdF(path,3);
      
     
     % TODO: work out d_P
@@ -85,26 +87,24 @@ if nargin > 1 % generate a trajectory (given waypoints)
     d_Pz_opt = -pinv(R_PP) * R_FP' * d_Fz;
     
     % TODO: stack d_F and d_P into d
-%     d_x = 
-%     d_y = 
-%     d_z = 
+    d_x = [d_Fx;d_Px_opt];
+    d_y = [d_Fy;d_Py_opt];
+    d_z = [d_Fz;d_Pz_opt];
     
     % TODO: mapping back to coefficients of the polynomial (position)
-%     p_x = 
-%     p_y = 
-%     p_z = 
+    p_x = pinv(M)*Ct*d_x;
+    p_y = pinv(M)*Ct*d_y;
+    p_z = pinv(M)*Ct*d_z;
     
-%     pos_coeffs = 
+    pos_coeffs = [p_x,p_y,p_z];
     
     % TODO: work out the coefficients of the velocity polynomial
-    v_x = zeros(size(p_x));
-    v_y = zeros(size(p_y));
-    v_z = zeros(size(p_z));
+%     dev_coeffs = repmat(1:7,1,num);
+    dev_coeffs = kron(ones(1,num),1:7);
+    size(pos_coeffs)
 
-    % ...
-    
-    vel_coeffs = [v_x v_y v_z];
-    
+    vel_coeffs = dev_coeffs * pos_coeffs(kron(0:num-1,ones(1,7)*8)+kron(ones(1,num),2:8),:);
+
     % Visualization: plot the trajectory
     subplot(h);
     pos_x = [];
@@ -141,22 +141,23 @@ else
         end
        
         % load coefficients from the resulting trajectory
-        px = pos_coeffs(:,1:8);
-        py = pos_coeffs(:,9:16);
-        pz = pos_coeffs(:,17:24);
-        
-        vx = vel_coeffs(:,1:8);
-        vy = vel_coeffs(:,9:16);
-        vz = vel_coeffs(:,17:24);
+%         px = pos_coeffs(:,1:8);
+%         py = pos_coeffs(:,9:16);
+%         pz = pos_coeffs(:,17:24);
+%         
+%         vx = vel_coeffs(:,1:8);
+%         vy = vel_coeffs(:,9:16);
+%         vz = vel_coeffs(:,17:24);
         
         % Calculate the state at the query time instance t
-        pos_x = polyval(flip(px(t_index,:)) , t);
-        pos_y = polyval(flip(py(t_index,:)) , t);
-        pos_z = polyval(flip(pz(t_index,:)) , t);
+        isempty(pos_coeffs)
+        pos_x = polyval(flip(pos_coeffs((t_index)*8+1:(t_index-1)*8+8,1)) , t);
+        pos_y = polyval(flip(pos_coeffs((t_index)*8+1:(t_index-1)*8+8,2)) , t);
+        pos_z = polyval(flip(pos_coeffs((t_index)*8+1:(t_index-1)*8+8,3)) , t);
         
-        vel_x = polyval(flip(vx(t_index,:)) , t);
-        vel_y = polyval(flip(vy(t_index,:)) , t);
-        vel_z = polyval(flip(vz(t_index,:)) , t);
+        vel_x = polyval(flip(vel_coeffs((t_index)*7+1:(t_index-1)*7+7,1)) , t);
+        vel_y = polyval(flip(vel_coeffs((t_index)*7+1:(t_index-1)*7+7,2)) , t);
+        vel_z = polyval(flip(vel_coeffs((t_index)*7+1:(t_index-1)*7+7,3)) , t);
         
         % Output
         s_des(7:10) = [1;0;0;0];

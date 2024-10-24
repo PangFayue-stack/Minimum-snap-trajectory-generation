@@ -3,7 +3,7 @@
 close all;
 clear all;
 clc;
-addpath('./utils','./readonly');
+addpath('./utils','./readonly','./././Project1_Phase1/code');
 
 path1 = [0 0 0; ...
          0.0 0.0 1.0 ; ...
@@ -61,7 +61,7 @@ h7 = subplot(3,3,7);
 h8 = subplot(3,3,8);
 h9 = subplot(3,3,9);
 set(gcf, 'Renderer', 'painters');
-set(gcf, 'Position', [100, 100, 1400, 1000]); 
+set(gcf, 'Position', [100, 100, 700, 500]); 
 % set(gcf, 'WindowStyle','Modal');
 
 
