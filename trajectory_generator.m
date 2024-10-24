@@ -56,18 +56,28 @@ if nargin > 1 % generate a trajectory (given waypoints)
      
     % TODO:
 	% Prepare the selection matrix C.
-    C = zeros(8 * num, 8 + 2 * (num - 1) + 3 * (num - 1));
+    Ct = zeros(8 * num, 8 + 2 * (num - 1) + 3 * (num - 1));
     % 为每个航路点设置起始和结束约束
-    for i = 1:(n-1)
-        C((i-1)*8+1, i) = 1;  % 起点约束
-        C(i*8, i+1) = 1;      % 终点约束
+    for i=1:4
+        Ct(i,i) = 1;
     end
+    for i=1:num-1
+        Ct(8*i-3, 2*i+3) = 1;
+        Ct(8*i+1, 2*i+4) = 1;
+    end
+    for i=1:n-1
+        for j=2:4
+            Ct(8*i-4+j, 8+2*(num-1)+3*(i-1)+j-1) = 1;
+        end
+    end
+    C = Ct';
     
     % TODO: prepare the R matrix of the unconstained Quadric Programming
     % (QP) problem.
-    R = C' * Q * C;  % 构建优化问题的代价函数
-    R_PP = R(1:n, 1:n);  % 位置部分
-    R_FP = R(n+1:end, n+1:end);  % 速度、加速度部分
+    R = C*pinv(M)'*Q*pinv(M)*Ct;
+    R_cell = mat2cell(R,[8*2*(num-1), 3*(n-1)],[8*2*(num-1), 3*(n-1)]);
+    R_PP = R_cell{2,2};
+    R_FP = R_cell{1,2};
     
     % TODO: Solve the unconstrained QP problem.
     % Prepare for d_F
