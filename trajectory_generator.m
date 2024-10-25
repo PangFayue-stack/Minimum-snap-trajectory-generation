@@ -31,7 +31,7 @@ if nargin > 1 % generate a trajectory (given waypoints)
     % each time instance at which the quadrotor passes by each waypoint.
     num = size(path, 1)-1;  % 航路的段数
     time_interval = arrangeT(path);
-    traj_time = arrangeT(path);
+    traj_time = [0,cumsum(time_interval)];
     waypoints = path;
     
     % TODO: Minimum-snap trajectory 
