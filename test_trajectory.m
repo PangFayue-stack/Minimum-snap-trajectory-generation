@@ -3,7 +3,7 @@
 close all;
 clear all;
 clc;
-addpath('./utils','./readonly','./././Project1_Phase1/code');
+addpath('./utils','./readonly','../../../Project1_Phase1/code');
 
 path1 = [0 0 0; ...
          0.0 0.0 1.0 ; ...

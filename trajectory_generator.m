@@ -23,6 +23,7 @@ s_des = zeros(13,1);
 s_des(7:10) = [1;0;0;0];
 
 
+
 % Part I
 if nargin > 1 % generate a trajectory (given waypoints)
     % TODO: 
@@ -31,6 +32,7 @@ if nargin > 1 % generate a trajectory (given waypoints)
     num = size(path, 1)-1;  % 航路的段数
     time_interval = arrangeT(path);
     traj_time = arrangeT(path);
+    waypoints = path;
     
     % TODO: Minimum-snap trajectory 
     % Prepare the Q matrix for a 7th-order polynomial
@@ -47,7 +49,7 @@ if nargin > 1 % generate a trajectory (given waypoints)
     % TODO: 
     % Prepare the mapping matrix (polynomial coefficients --> derivatives of states)
     M = zeros(8 * num, 8 * num );
-    getM(num,7,time_interval);
+    M = getM(num,7,time_interval);
      
     % TODO:
 	% Prepare the selection matrix C.
@@ -57,7 +59,7 @@ if nargin > 1 % generate a trajectory (given waypoints)
         Ct(i,i) = 1;
     end
     for i=1:num-1
-        Ct(8*i-3, 2*i+3) = 1;
+        Ct(8*i-3, 2*i+4) = 1;
         Ct(8*i+1, 2*i+4) = 1;
     end
     for i=1:num-1
@@ -99,12 +101,13 @@ if nargin > 1 % generate a trajectory (given waypoints)
     pos_coeffs = [p_x,p_y,p_z];
     
     % TODO: work out the coefficients of the velocity polynomial
-%     dev_coeffs = repmat(1:7,1,num);
-    dev_coeffs = kron(ones(1,num),1:7);
-    size(pos_coeffs)
+    dev_coeffs = repmat((1:7)',num,3);
 
-    vel_coeffs = dev_coeffs * pos_coeffs(kron(0:num-1,ones(1,7)*8)+kron(ones(1,num),2:8),:);
-
+    vel_coeffs = dev_coeffs .* pos_coeffs(kron(0:num-1,ones(1,7)*8)+kron(ones(1,num),2:8),:);
+    
+    p_x = reshape(p_x,8,num);p_x = p_x';
+    p_y = reshape(p_y,8,num);p_y = p_y';
+    p_z = reshape(p_z,8,num);p_z = p_z';
     % Visualization: plot the trajectory
     subplot(h);
     pos_x = [];
@@ -150,14 +153,13 @@ else
 %         vz = vel_coeffs(:,17:24);
         
         % Calculate the state at the query time instance t
-        isempty(pos_coeffs)
-        pos_x = polyval(flip(pos_coeffs((t_index)*8+1:(t_index-1)*8+8,1)) , t);
-        pos_y = polyval(flip(pos_coeffs((t_index)*8+1:(t_index-1)*8+8,2)) , t);
-        pos_z = polyval(flip(pos_coeffs((t_index)*8+1:(t_index-1)*8+8,3)) , t);
+        pos_x = polyval(flip(pos_coeffs((t_index)*8+1:(t_index)*8+8,1)) , t);
+        pos_y = polyval(flip(pos_coeffs((t_index)*8+1:(t_index)*8+8,2)) , t);
+        pos_z = polyval(flip(pos_coeffs((t_index)*8+1:(t_index)*8+8,3)) , t);
         
-        vel_x = polyval(flip(vel_coeffs((t_index)*7+1:(t_index-1)*7+7,1)) , t);
-        vel_y = polyval(flip(vel_coeffs((t_index)*7+1:(t_index-1)*7+7,2)) , t);
-        vel_z = polyval(flip(vel_coeffs((t_index)*7+1:(t_index-1)*7+7,3)) , t);
+        vel_x = polyval(flip(vel_coeffs((t_index)*7+1:(t_index)*7+7,1)) , t);
+        vel_y = polyval(flip(vel_coeffs((t_index)*7+1:(t_index)*7+7,2)) , t);
+        vel_z = polyval(flip(vel_coeffs((t_index)*7+1:(t_index)*7+7,3)) , t);
         
         % Output
         s_des(7:10) = [1;0;0;0];
