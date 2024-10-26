@@ -58,14 +58,14 @@ if nargin > 1 % generate a trajectory (given waypoints)
     for i=1:4
         Ct(i,i) = 1;
     end
+    Ct(8*num-3:8*num,4+2*(num-1)+1:8+2*(num-1)) = eye(4);
     for i=1:num-1
         Ct(8*i-3, 2*i+4) = 1;
         Ct(8*i+1, 2*i+4) = 1;
     end
     for i=1:num-1
-        for j=2:4
-            Ct(8*i-4+j, 8+2*(num-1)+3*(i-1)+j-1) = 1;
-        end
+       Ct(8*i-2:8*i,8+2*(num-1)+3*(i-1)+1:8+2*(num-1)+3*(i-1)+3) = eye(3);
+       Ct(8*i+2:8*i+4,8+2*(num-1)+3*(i-1)+1:8+2*(num-1)+3*(i-1)+3) = eye(3);
     end
     C = Ct';
     
@@ -153,13 +153,13 @@ else
 %         vz = vel_coeffs(:,17:24);
         
         % Calculate the state at the query time instance t
-        pos_x = polyval(flip(pos_coeffs((t_index)*8+1:(t_index)*8+8,1)) , t);
-        pos_y = polyval(flip(pos_coeffs((t_index)*8+1:(t_index)*8+8,2)) , t);
-        pos_z = polyval(flip(pos_coeffs((t_index)*8+1:(t_index)*8+8,3)) , t);
+        pos_x = polyval(flip(pos_coeffs((t_index-1)*8+1:(t_index-1)*8+8,1)) , t);
+        pos_y = polyval(flip(pos_coeffs((t_index-1)*8+1:(t_index-1)*8+8,2)) , t);
+        pos_z = polyval(flip(pos_coeffs((t_index-1)*8+1:(t_index-1)*8+8,3)) , t);
         
-        vel_x = polyval(flip(vel_coeffs((t_index)*7+1:(t_index)*7+7,1)) , t);
-        vel_y = polyval(flip(vel_coeffs((t_index)*7+1:(t_index)*7+7,2)) , t);
-        vel_z = polyval(flip(vel_coeffs((t_index)*7+1:(t_index)*7+7,3)) , t);
+        vel_x = polyval(flip(vel_coeffs((t_index-1)*7+1:(t_index-1)*7+7,1)) , t);
+        vel_y = polyval(flip(vel_coeffs((t_index-1)*7+1:(t_index-1)*7+7,2)) , t);
+        vel_z = polyval(flip(vel_coeffs((t_index-1)*7+1:(t_index-1)*7+7,3)) , t);
         
         % Output
         s_des(7:10) = [1;0;0;0];
@@ -173,6 +173,46 @@ else
     end     
 end
 
+end
+
+function d_F = getdF(path,i)
+    t = path(:,i);
+    n = size(t,1)-1;
+    d_F = zeros(2 * n + 6,1);
+    d_F(1:4) = [t(1,1);0;0;0];
+    for i=1:size(t,1)-2
+        d_F(4+i*2-1,1)=t(i+1);
+        d_F(4+i*2,1)=t(i+1);
+    end
+    d_F(4+2*(n-1)+1:8+2*(n-1),1) = [t(end);0;0;0];
+end
+
+function M = getM(n_seg, n_order, time_interval)
+    M = [];
+    d_order = 4;
+    for j = 1:n_seg
+        M_k = zeros(8,8);
+        for k=0:d_order-1
+            M_k(k+1,k+1) = factorial(k);
+            for i=k:n_order
+                M_k(k+1+4,i+1)=factorial(i)/factorial(i-k)*time_interval(j)^(i-k);
+            end
+        end
+        M = blkdiag(M, M_k);
+    end
+end
+
+function time_interval = arrangeT(path)
+    n = size(path,1);
+    time_interval = zeros(1,n-1);
+    for i=1:n-1
+        time_interval(i) = distance(path(i,:)',path(i+1,:)');
+    end
+end
+
+function dist = distance(point1, point2) %column vector
+    d = point1 - point2;
+    dist = sqrt(d' * d);
 end
 
 

@@ -74,12 +74,12 @@ W_des = s_des(11:13)*0;   % 期望的角速度 (dphi_des, dtheta_des, dpsi_des)
 [phiC,thetaC,psiC] = RotToRPY_ZXY(quaternion_to_R(quat_des));
 
 % 位置PD控制器增益
-kp_pos = [20; 10; 10];  % 位置比例增益
-kd_pos = [20; 30; 20];   % 速度微分增益
+kp_pos = [10; 10; 25];  % 位置比例增益
+kd_pos = [15; 15; 15];   % 速度微分增益
 
 % 姿态PD控制器增益
-kp_angle = [400; 400; 400];  % 姿态角比例增益
-kd_angle = [55; 55; 55];     % 姿态角微分增益
+kp_angle = [900; 900; 900];  % 姿态角比例增益
+kd_angle = [60; 60; 60];     % 姿态角微分增益
 
 %% 位置控制（计算推力F）
 pos_error = pos_des - pos;             % 位置误差
