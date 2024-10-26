@@ -55,17 +55,12 @@ if nargin > 1 % generate a trajectory (given waypoints)
 	% Prepare the selection matrix C.
     Ct = zeros(8 * num, 8 + 2 * (num - 1) + 3 * (num - 1));
     % 为每个航路点设置起始和结束约束
-    for i=1:4
-        Ct(i,i) = 1;
-    end
-    Ct(8*num-3:8*num,4+2*(num-1)+1:8+2*(num-1)) = eye(4);
+    Ct(1:4,1:4) = eye(4);%起点的pvaj
+    Ct(8*num-3:8*num,4+2*(num-1)+1:8+2*(num-1)) = eye(4);%终点的pvaj
     for i=1:num-1
-        Ct(8*i-3, 2*i+4) = 1;
-        Ct(8*i+1, 2*i+4) = 1;
-    end
-    for i=1:num-1
-       Ct(8*i-2:8*i,8+2*(num-1)+3*(i-1)+1:8+2*(num-1)+3*(i-1)+3) = eye(3);
-       Ct(8*i+2:8*i+4,8+2*(num-1)+3*(i-1)+1:8+2*(num-1)+3*(i-1)+3) = eye(3);
+        Ct([8*i-3,8*i+1], 2*i+4) = 1;%中间点的p
+        Ct(8*i-2:8*i,8+2*(num-1)+3*(i-1)+1:8+2*(num-1)+3*(i-1)+3) = eye(3);%中间点t=T的vaj
+       Ct(8*i+2:8*i+4,8+2*(num-1)+3*(i-1)+1:8+2*(num-1)+3*(i-1)+3) = eye(3);%下一个中间点t=0的vaj
     end
     C = Ct';
     
