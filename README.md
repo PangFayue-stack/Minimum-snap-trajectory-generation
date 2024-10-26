@@ -12,26 +12,26 @@ minimum-snap具体推导可以参考
 
 ## 文件结构Structure
 
-│  controller.m PD控制器
-│  README.md
-│  README.txt English profile
-│  test_trajectory.m 主程序
-│  trajectory_generator.m minimum-snap算法实现
-├─readonly 工具包
-│      quadEOM_readonly.m
-│      quadModel_readonly.m
-│      run_trajectory_readonly.m
-└─utils 工具包
-        quaternion_to_R.m
-        QuatToRot.m
-        RotToQuat.m
-        RotToRPY_ZXY.m
-        RPYtoRot_ZXY.m
-        R_to_quaternion.m
-        R_to_ypr.m
-        ypr_to_R.m
+│  controller.m PD控制器  
+│  README.md  
+│  README.txt English profile  
+│  test_trajectory.m 主程序  
+│  trajectory_generator.m minimum-snap算法实现  
+├─readonly 工具包  
+│      quadEOM_readonly.m  
+│      quadModel_readonly.m  
+│      run_trajectory_readonly.m  
+└─utils 工具包  
+        quaternion_to_R.m  
+        QuatToRot.m  
+        RotToQuat.m  
+        RotToRPY_ZXY.m  
+        RPYtoRot_ZXY.m  
+        R_to_quaternion.m  
+        R_to_ypr.m  
+        ypr_to_R.m      
 
-## demo
+## demo   
 
 ![](./utils/demo.png)
 
